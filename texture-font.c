@@ -81,6 +81,9 @@ texture_font_load_face(texture_font_t *self, float size,
         goto cleanup_face;
     }
 
+
+
+
     /* Set char size */
     error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
 
@@ -231,7 +234,7 @@ texture_font_init(texture_font_t *self)
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
 
-    if (!texture_font_load_face(self, self->size * 100.f, &library, &face))
+    if (!texture_font_load_face(self, self->size, &library, &face))
         return -1;
 
     self->underline_position = face->underline_position / (float)(HRESf*HRESf) * self->size;
@@ -249,9 +252,9 @@ texture_font_init(texture_font_t *self)
     }
 
     metrics = face->size->metrics;
-    self->ascender = (metrics.ascender >> 6) / 100.0;
-    self->descender = (metrics.descender >> 6) / 100.0;
-    self->height = (metrics.height >> 6) / 100.0;
+    self->ascender = (metrics.ascender >> 6);
+    self->descender = (metrics.descender >> 6);
+    self->height = (metrics.height >> 6);
     self->linegap = self->height - self->ascender + self->descender;
     FT_Done_Face( face );
     FT_Done_FreeType( library );

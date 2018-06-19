@@ -204,6 +204,14 @@ typedef struct texture_glyph_t
 typedef struct texture_font_t
 {
     /**
+     * This field is simply used to compute a default line spacing (i.e., the
+     * baseline-to-baseline distance) when writing text with this font. Note
+     * that it usually is larger than the sum of the ascender and descender
+     * taken as absolute values. There is also no guarantee that no glyphs
+     * extend above or below subsequent baselines when using this distance.
+     */
+    float height;
+    /**
      * Vector of glyphs contained in this font.
      */
     vector_t * glyphs;
@@ -212,29 +220,6 @@ typedef struct texture_font_t
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-
-    /**
-     * font location
-     */
-    enum {
-        TEXTURE_FONT_FILE = 0,
-        TEXTURE_FONT_MEMORY,
-    } location;
-
-    union {
-        /**
-         * Font filename, for when location == TEXTURE_FONT_FILE
-         */
-        char *filename;
-
-        /**
-         * Font memory address, for when location == TEXTURE_FONT_MEMORY
-         */
-        struct {
-            const void *base;
-            size_t size;
-        } memory;
-    };
 
     /**
      * Font size
@@ -270,16 +255,6 @@ typedef struct texture_font_t
      * Whether to use kerning if available
      */
     int kerning;
-
-
-    /**
-     * This field is simply used to compute a default line spacing (i.e., the
-     * baseline-to-baseline distance) when writing text with this font. Note
-     * that it usually is larger than the sum of the ascender and descender
-     * taken as absolute values. There is also no guarantee that no glyphs
-     * extend above or below subsequent baselines when using this distance.
-     */
-    float height;
 
     /**
      * This field is the distance that must be placed between two lines of
@@ -320,6 +295,29 @@ typedef struct texture_font_t
      * formats.
      */
     float underline_thickness;
+
+    /**
+     * font location
+     */
+    enum {
+        TEXTURE_FONT_FILE = 0,
+        TEXTURE_FONT_MEMORY,
+    } location;
+
+    union {
+        /**
+         * Font filename, for when location == TEXTURE_FONT_FILE
+         */
+        char *filename;
+
+        /**
+         * Font memory address, for when location == TEXTURE_FONT_MEMORY
+         */
+        struct {
+            const void *base;
+            size_t size;
+        } memory;
+    };
 
 } texture_font_t;
 
@@ -391,9 +389,9 @@ typedef struct texture_font_t
   texture_font_get_glyph( texture_font_t * self,
                           const char * codepoint );
 
-/** 
- * Request an already loaded glyph from the font. 
- * 
+/**
+ * Request an already loaded glyph from the font.
+ *
  * @param self      A valid texture font
  * @param codepoint Character codepoint to be found in UTF-8 encoding.
  *
@@ -402,7 +400,7 @@ typedef struct texture_font_t
  texture_glyph_t *
  texture_font_find_glyph( texture_font_t * self,
                           const char * codepoint );
-    
+
 /**
  * Request the loading of a given glyph.
  *
