@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,6 +125,11 @@ typedef struct texture_glyph_t
     uint32_t codepoint;
 
     /**
+     * Freetype glyphid this glyph represents as returned by FT_Get_Char_Index.
+     */
+    uint32_t glyph_id;
+
+    /**
      * Glyph's width in pixels.
      */
     size_t width;
@@ -214,7 +221,8 @@ typedef struct texture_font_t
     /**
      * Vector of glyphs contained in this font.
      */
-    vector_t * glyphs;
+    vector_t * glyphs_per_glyph_id;
+    vector_t * glyphs_per_codepoint;
 
     /**
      * Atlas structure to store glyphs data.
@@ -319,6 +327,9 @@ typedef struct texture_font_t
         } memory;
     };
 
+    FT_Library library;
+    FT_Face face;
+
 } texture_font_t;
 
 
@@ -389,6 +400,22 @@ typedef struct texture_font_t
   texture_font_get_glyph( texture_font_t * self,
                           const char * codepoint );
 
+
+/**
+ * Request a new glyph from the font. If it has not been created yet, it will
+ * be.
+ *
+ * @param self      A valid texture font
+ * @param codepoint Character codepoint to be loaded in UTF-8 encoding.
+ *
+ * @return A pointer on the new glyph or 0 if the texture atlas is not big
+ *         enough
+ *
+ */
+  texture_glyph_t *
+  texture_font_get_glyph_by_id( texture_font_t * self,
+                          uint32_t glyph_id );
+
 /**
  * Request an already loaded glyph from the font.
  *
@@ -411,7 +438,8 @@ typedef struct texture_font_t
  */
   int
   texture_font_load_glyph( texture_font_t * self,
-                           const char * codepoint );
+                           const char * codepoint,
+                           uint32_t glyph_id );
 
 /**
  * Request the loading of several glyphs at once.
